@@ -2,9 +2,6 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export const __wbg_rpchandler_free: (a: number, b: number) => void;
-export const parse_invite_code: (a: number, b: number) => [number, number, number, number];
-export const parse_bolt11_invoice: (a: number, b: number) => [number, number, number, number];
-export const preview_federation: (a: number, b: number) => any;
 export const rpchandler_new: () => number;
 export const rpchandler_rpc: (a: number, b: number, c: number, d: any) => [number, number];
 export const __wbg_intounderlyingsource_free: (a: number, b: number) => void;
@@ -33,15 +30,15 @@ export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) =>
 export const __wbindgen_export_5: WebAssembly.Table;
 export const __externref_table_dealloc: (a: number) => void;
 export const __wbindgen_free: (a: number, b: number, c: number) => void;
-export const closure2_externref_shim: (a: number, b: number, c: any) => void;
-export const closure2558_externref_shim: (a: number, b: number, c: any) => void;
-export const closure9155_externref_shim: (a: number, b: number, c: any) => void;
+export const closure1702_externref_shim: (a: number, b: number, c: any) => void;
+export const closure2692_externref_shim: (a: number, b: number, c: any) => void;
+export const closure9289_externref_shim: (a: number, b: number, c: any) => void;
 export const _dyn_core__ops__function__Fn_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hb2702963d8fe80ce: (a: number, b: number) => void;
 export const _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hccebb8dc996bf447: (a: number, b: number) => void;
-export const closure11178_externref_shim: (a: number, b: number, c: any) => void;
+export const closure11312_externref_shim: (a: number, b: number, c: any) => void;
 export const _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h73e72502136e0af8: (a: number, b: number) => void;
 export const _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h7d210158df022ab1: (a: number, b: number) => void;
-export const closure11778_externref_shim: (a: number, b: number, c: any) => void;
+export const closure11912_externref_shim: (a: number, b: number, c: any) => void;
 export const _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hbd890e54ef7b5849: (a: number, b: number) => void;
-export const closure12148_externref_shim: (a: number, b: number, c: any, d: any) => void;
+export const closure12282_externref_shim: (a: number, b: number, c: any, d: any) => void;
 export const __wbindgen_start: () => void;

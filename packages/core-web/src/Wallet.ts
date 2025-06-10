@@ -104,12 +104,12 @@ export class Wallet {
       )
       this._isOpen = true
       this._resolveOpen()
+      this._federationId = inviteCode // for now
 
       logger.info(
         `Wallet ${this.id} successfully joined federation ${this._federationId}`,
       )
       if (res) {
-        this._federationId = inviteCode // for now
         logger.info(
           `Federation ID for wallet ${this.id} is now ${this._federationId}`,
         )

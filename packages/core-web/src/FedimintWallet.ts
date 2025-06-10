@@ -8,6 +8,7 @@ logger.setLevel('debug')
 
 export { Wallet }
 export class FedimintWallet {
+  // Manager
   private static instance: FedimintWallet
   private _client: RpcClient
   private _initialized: boolean = false

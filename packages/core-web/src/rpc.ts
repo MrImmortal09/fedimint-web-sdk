@@ -204,6 +204,18 @@ export class RpcClient {
     })
   }
 
+  async parseInviteCode(inviteCode: string) {
+    const response = await this.internalRpcSingle<{
+      type: string
+      data: JSONValue
+      requestId: number
+    }>({
+      type: 'parse_invite_code',
+      invite_code: inviteCode,
+    })
+    return response
+  }
+
   async cleanup() {
     this.subscriptionManager.cancelAll()
     this.subscriptionManager.clear()

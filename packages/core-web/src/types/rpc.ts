@@ -27,6 +27,10 @@ export type RpcRequest =
       type: 'cancel_rpc'
       cancel_request_id: number
     }
+  | {
+      type: 'parse_invite_code'
+      invite_code: string
+    }
 
 export type RpcResponseFull = {
   request_id: number

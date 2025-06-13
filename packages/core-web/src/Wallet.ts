@@ -36,10 +36,10 @@ export class Wallet {
       this._resolveOpen = resolve
     })
 
-    // Initialize services
-    this.balance = new BalanceService(this._client)
+    // Todo : add clientName
+    this.balance = new BalanceService(this._client, this._clientName)
     this.mint = new MintService(this._client)
-    this.lightning = new LightningService(this._client)
+    this.lightning = new LightningService(this._client, this._clientName)
     this.federation = new FederationService(this._client)
     this.recovery = new RecoveryService(this._client)
     this.wallet = new WalletService(this._client)
@@ -95,16 +95,16 @@ export class Wallet {
     }
 
     try {
-      // Parse invite code to get federation ID
-      // const parsedInvite = await this._client.parseInviteCode(inviteCode)
       logger.info('called joinFederation with invite code:', inviteCode)
       const res = await this._client.joinFederation(
         inviteCode,
         this._clientName,
       )
+      this._federationId = (
+        await this._client.parseInviteCode(inviteCode)
+      ).federation_id
       this._isOpen = true
       this._resolveOpen()
-      this._federationId = inviteCode // for now
 
       logger.info(
         `Wallet ${this.id} successfully joined federation ${this._federationId}`,

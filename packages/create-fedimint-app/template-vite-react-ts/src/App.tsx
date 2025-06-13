@@ -1,4 +1,4 @@
-import { use, useCallback, useEffect, useState } from 'react'
+import { act, use, useCallback, useEffect, useState } from 'react'
 import { FedimintWallet, Wallet } from '@fedimint/core-web'
 
 const TESTNET_FEDERATION_CODE =
@@ -27,23 +27,14 @@ const App = () => {
   const [joining, setJoining] = useState(false)
   const [joinSuccess, setJoinSuccess] = useState(false)
 
-  useEffect(() => {
-    setWalletData(null)
-    if (!activeWallet) return
-    const fetchWalletData = async () => {
-      try {
-        const federationId = activeWallet.federationId
-        setWalletData(federationId)
-      } catch (error) {
-        console.error('Error fetching wallet data:', error)
-        setError(error instanceof Error ? error.message : String(error))
-      }
-    }
-  }),
-    [joining, activeWallet]
   // Wallet management functions
   const createWallet = useCallback(async () => {
     const wallet = await fedimintWallet.createWallet()
+    setBalance(0)
+    setWalletData(null)
+    setJoinSuccess(false)
+    setWalletId('')
+    setError('')
     setWallets((prev) => [...prev, wallet])
     if (!activeWallet) {
       setActiveWallet(wallet)
@@ -76,6 +67,7 @@ const App = () => {
     const wallet = fedimintWallet.getWallet(walletId)
     if (wallet) {
       setActiveWallet(wallet)
+      setJoinSuccess(wallet.federationId !== undefined ? true : false)
     }
   }, [])
 
@@ -123,11 +115,7 @@ const App = () => {
       const res = await activeWallet.joinFederation(inviteCode)
       console.log('join federation res', res)
       setJoinSuccess(true)
-      const li = await activeWallet.lightning.createInvoice(
-        1000,
-        'here is 1000 sats',
-      )
-      const parsedi = await activeWallet.parseInviteCode(inviteCode)
+      console.log('Current Federation Id: ', activeWallet.federationId)
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error))
       setJoinSuccess(false)
@@ -160,31 +148,42 @@ const App = () => {
   }, [activeWallet])
 
   useEffect(() => {
+    // Reset balance immediately when wallet changes
     setBalance(0)
 
-    if (!activeWallet || !activeWallet.isOpen()) {
+    if (!activeWallet?.federationId) {
       return
     }
 
-    const getCurrentBalance = async () => {
+    // Fetch current balance immediately
+    const fetchBalance = async () => {
       try {
         const currentBalance = await activeWallet.balance.getBalance()
+        console.log('Current balance:', currentBalance)
         setBalance(currentBalance)
       } catch (error) {
         console.error('Error fetching balance:', error)
+        setBalance(0)
       }
     }
 
-    getCurrentBalance()
+    fetchBalance()
 
-    const unsubscribe = activeWallet.balance.subscribeBalance((balance) => {
-      setBalance(balance)
-    })
+    // Subscribe to balance changes
+    const unsubscribe = activeWallet.balance.subscribeBalance(
+      (balance) => {
+        setBalance(balance)
+      },
+      (error) => {
+        console.error('Balance subscription error:', error)
+        setBalance(0)
+      },
+    )
 
     return () => {
       unsubscribe()
     }
-  }, [activeWallet])
+  }, [activeWallet, activeWallet?.federationId])
 
   return (
     <>
@@ -254,7 +253,9 @@ const App = () => {
               </div>
               <div>
                 <strong>Federation ID:</strong>{' '}
-                {walletData ? walletData : 'Not joined'}
+                {activeWallet.federationId
+                  ? activeWallet.federationId
+                  : 'Not joined'}
               </div>
             </div>
 

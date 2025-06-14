@@ -47,7 +47,8 @@ self.onmessage = async (event) => {
     event.data.type === 'join_federation' ||
     event.data.type === 'cancel_rpc' ||
     event.data.type === 'parse_invite_code' ||
-    event.data.type === 'preview_federation'
+    event.data.type === 'preview_federation' ||
+    event.data.type === 'parse_bolt11_invoice'
   ) {
     // Check if rpcHandler is initialized before calling rpc
     if (!rpcHandler) {

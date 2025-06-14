@@ -36,13 +36,14 @@ export class Wallet {
       this._resolveOpen = resolve
     })
 
-    // Todo : add clientName
+    // nit: are both the client and clientName needed?, or would just the clientName suffice?
+    // might be backwards compatible if we keep both
     this.balance = new BalanceService(this._client, this._clientName)
-    this.mint = new MintService(this._client)
+    this.mint = new MintService(this._client, this._clientName)
     this.lightning = new LightningService(this._client, this._clientName)
-    this.federation = new FederationService(this._client)
-    this.recovery = new RecoveryService(this._client)
-    this.wallet = new WalletService(this._client)
+    this.federation = new FederationService(this._client, this._clientName)
+    this.recovery = new RecoveryService(this._client, this._clientName)
+    this.wallet = new WalletService(this._client, this._clientName)
 
     // Register wallet
     WalletRegistry.getInstance().addWallet(this)

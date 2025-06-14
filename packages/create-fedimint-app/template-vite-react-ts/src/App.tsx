@@ -1,4 +1,4 @@
-import { act, use, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FedimintWallet, Wallet } from '@fedimint/core-web'
 
 const TESTNET_FEDERATION_CODE =
@@ -26,6 +26,16 @@ const App = () => {
   const [inviteCode, setInviteCode] = useState(TESTNET_FEDERATION_CODE)
   const [joining, setJoining] = useState(false)
   const [joinSuccess, setJoinSuccess] = useState(false)
+  // Add preview state
+  const [previewData, setPreviewData] = useState<any>(null)
+  const [previewing, setPreviewing] = useState(false)
+
+  // New state for utility functions
+  const [parseInviteInput, setParseInviteInput] = useState('')
+  const [parsedInviteData, setParsedInviteData] = useState<any>(null)
+  const [parseBolt11Input, setParseBolt11Input] = useState('')
+  const [parsedBolt11Data, setParsedBolt11Data] = useState<any>(null)
+  const [parsing, setParsing] = useState(false)
 
   // Wallet management functions
   const createWallet = useCallback(async () => {
@@ -124,6 +134,65 @@ const App = () => {
     }
   }
 
+  // Add preview federation function
+  const previewFederation = async () => {
+    if (!inviteCode.trim()) return
+
+    setPreviewing(true)
+    setError('')
+
+    try {
+      const data = await fedimintWallet.previewFederation(inviteCode)
+      setPreviewData(data)
+      console.log('Preview federation:', data)
+    } catch (error) {
+      console.error('Error previewing federation:', error)
+      setError(error instanceof Error ? error.message : String(error))
+      setPreviewData(null)
+    } finally {
+      setPreviewing(false)
+    }
+  }
+
+  // Utility functions
+  const parseInviteCode = async () => {
+    if (!parseInviteInput.trim()) return
+
+    setParsing(true)
+    setError('')
+
+    try {
+      const data = await fedimintWallet.parseInviteCode(parseInviteInput)
+      setParsedInviteData(data)
+      console.log('Parsed invite code:', data)
+    } catch (error) {
+      console.error('Error parsing invite code:', error)
+      setError(error instanceof Error ? error.message : String(error))
+      setParsedInviteData(null)
+    } finally {
+      setParsing(false)
+    }
+  }
+
+  const parseBolt11Invoice = async () => {
+    if (!parseBolt11Input.trim()) return
+
+    setParsing(true)
+    setError('')
+
+    try {
+      const data = await fedimintWallet.parseBolt11Invoice(parseBolt11Input)
+      setParsedBolt11Data(data)
+      console.log('Parsed Bolt11 invoice:', data)
+    } catch (error) {
+      console.error('Error parsing Bolt11 invoice:', error)
+      setError(error instanceof Error ? error.message : String(error))
+      setParsedBolt11Data(null)
+    } finally {
+      setParsing(false)
+    }
+  }
+
   // Open wallet form handler
   const handleOpenWallet = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -188,7 +257,29 @@ const App = () => {
   return (
     <>
       <header>
-        <h1>Multi-Wallet Fedimint Demo</h1>
+        <h1>Fedimint Typescript Library Demo</h1>
+
+        <div className="steps">
+          <strong>Steps to get started:</strong>
+          <ol>
+            <li>Join a Federation (persists across sessions)</li>
+            <li>Generate an Invoice</li>
+            <li>
+              Pay the Invoice using the{' '}
+              <a href="https://faucet.mutinynet.com/" target="_blank">
+                mutinynet faucet
+              </a>
+            </li>
+            <li>
+              Investigate the Browser Tools
+              <ul>
+                <li>Browser Console for logs</li>
+                <li>Network Tab (websocket) for guardian requests</li>
+                <li>Application Tab for state</li>
+              </ul>
+            </li>
+          </ol>
+        </div>
       </header>
       <main>
         {/* Wallet Management Section */}
@@ -249,7 +340,7 @@ const App = () => {
                 <strong>Wallet ID:</strong> {activeWallet.id}
               </div>
               <div>
-                <strong>Balance:</strong> {balance} sats
+                <strong>Balance:</strong> {balance} Msats
               </div>
               <div>
                 <strong>Federation ID:</strong>{' '}
@@ -278,14 +369,52 @@ const App = () => {
                 >
                   <input
                     value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value)}
+                    onChange={(e) => {
+                      setInviteCode(e.target.value)
+                      setPreviewData(null) // Clear preview when invite code changes
+                    }}
                     placeholder="Invite code..."
                     required
                   />
-                  <button type="submit" disabled={joining}>
-                    {joining ? 'Joining...' : 'Join Federation'}
-                  </button>
+                  <div className="button-group">
+                    <button
+                      type="button"
+                      onClick={previewFederation}
+                      disabled={previewing || !inviteCode.trim()}
+                    >
+                      {previewing ? 'Previewing...' : 'Preview Federation'}
+                    </button>
+                    <button type="submit" disabled={joining}>
+                      {joining ? 'Joining...' : 'Join Federation'}
+                    </button>
+                  </div>
                 </form>
+
+                {/* Preview Results */}
+                {previewData && (
+                  <div className="preview-result">
+                    <h4>Federation Preview:</h4>
+                    <div className="preview-info">
+                      <div>
+                        <strong>Federation ID:</strong>{' '}
+                        {previewData.federation_id}
+                      </div>
+                      <div>
+                        <strong>Config :</strong> {previewData.url}
+                      </div>
+                      {previewData.federation_name && (
+                        <div>
+                          <strong>Name:</strong> {previewData.federation_name}
+                        </div>
+                      )}
+                      {/* Show other federation details if available */}
+                      <details>
+                        <summary>Full Details</summary>
+                        <pre>{JSON.stringify(previewData, null, 2)}</pre>
+                      </details>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -314,7 +443,7 @@ const App = () => {
                   }}
                 >
                   <div className="input-group">
-                    <label htmlFor="amount">Amount (sats):</label>
+                    <label htmlFor="amount">Amount (Msats):</label>
                     <input
                       id="amount"
                       type="number"
@@ -354,6 +483,62 @@ const App = () => {
             )}
           </>
         )}
+
+        {/* Parse Invite Code Section */}
+        <div className="section">
+          <h3>Parse Invite Code</h3>
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Enter invite code to parse"
+              value={parseInviteInput}
+              onChange={(e) => setParseInviteInput(e.target.value)}
+            />
+            <button onClick={parseInviteCode} disabled={parsing}>
+              {parsing ? 'Parsing...' : 'Parse Invite Code'}
+            </button>
+          </div>
+          {parsedInviteData && (
+            <div className="success">
+              <strong>Parsed Invite Code:</strong>
+              <div>
+                <strong>Federation ID:</strong> {parsedInviteData.federation_id}
+              </div>
+              <div>
+                <strong>URL:</strong> {parsedInviteData.url}
+              </div>
+              <details>
+                <summary>Full Details</summary>
+                <pre>{JSON.stringify(parsedInviteData, null, 2)}</pre>
+              </details>
+            </div>
+          )}
+        </div>
+
+        {/* Parse Bolt11 Invoice Section */}
+        <div className="section">
+          <h3>Parse Bolt11 Invoice</h3>
+          <div className="input-group">
+            <textarea
+              placeholder="Enter Bolt11 invoice to parse (e.g. lnbc1...)"
+              value={parseBolt11Input}
+              onChange={(e) => setParseBolt11Input(e.target.value)}
+              rows={3}
+            />
+            <button onClick={parseBolt11Invoice} disabled={parsing}>
+              {parsing ? 'Parsing...' : 'Parse Bolt11 Invoice'}
+            </button>
+          </div>
+          {parsedBolt11Data && (
+            <div className="success">
+              <strong>Parsed Bolt11 Invoice:</strong>
+              <details>
+                <summary>Full Details</summary>
+                <pre>{JSON.stringify(parsedBolt11Data, null, 2)}</pre>
+              </details>
+            </div>
+          )}
+        </div>
 
         {/* Error Display */}
         {error && <div className="error">{error}</div>}

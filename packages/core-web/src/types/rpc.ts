@@ -73,11 +73,12 @@ export interface ParsedInviteCode extends Record<string, JSONValue> {
 }
 
 export interface PreviewFederation extends Record<string, JSONValue> {
+  config: string
   federation_id: string
-  url: string
 }
 
 export interface ParsedBolt11Invoice extends Record<string, JSONValue> {
-  // Add specific properties based on what the RPC actually returns
-  // For now, keep it flexible
+  amount: number // in satoshis
+  expiry: number
+  memo: string
 }

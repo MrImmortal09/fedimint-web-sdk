@@ -9,17 +9,18 @@ You can use `subscribeLnReceive` to track the invoice status.
 `waitForReceive` returns a `Promise` that resolves when the invoice succeeds or `timeoutMs` is reached.
 
 ```ts twoslash
-// @esModuleInterop
 import { FedimintWallet } from '@fedimint/core-web'
 import type { LnReceiveState } from '@fedimint/core-web'
 
-const wallet = new FedimintWallet()
-wallet.open()
+const fedimintWallet = FedimintWallet.getInstance()
+const wallet = await fedimintWallet.createWallet()
+await wallet.joinFederation('fed11qgq...')
+await wallet.open()
 
-const { operation_id, invoice } = await wallet.lightning.createInvoice( // [!code focus]
-  10_000, // msats // [!code focus]
-  'This is an invoice description', // [!code focus]
-) // [!code focus]
+const { operation_id, invoice } = await wallet.lightning.createInvoice(
+  10_000, // amount in millisatoshis
+  'This is an invoice description',
+)
 
 console.log(operation_id) // operation id for the invoice
 console.log(invoice) // bolt11 invoice

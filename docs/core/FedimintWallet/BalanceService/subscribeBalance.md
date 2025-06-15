@@ -7,14 +7,16 @@ Subscribe to balance updates as they occur.
 ```ts twoslash
 import { FedimintWallet } from '@fedimint/core-web'
 
-const wallet = new FedimintWallet()
-wallet.open()
+const fedimintWallet = FedimintWallet.getInstance()
+const wallet = await fedimintWallet.createWallet()
+await wallet.joinFederation('fed11qgq...')
+await wallet.open()
 
-const unsubscribe = wallet.balance.subscribeBalance((mSats) => { // [!code focus]
-  console.log('Balance updated:', mSats) // [!code focus]
-  // 1000 mSats = 1 satoshi // [!code focus]
-}) // [!code focus]
+const unsubscribe = wallet.balance.subscribeBalance((mSats) => {
+  console.log('Balance updated:', mSats)
+  // mSats = 1 satoshi
+})
 
-// ...Cleanup Later
+// Cleanup Later
 unsubscribe()
 ```

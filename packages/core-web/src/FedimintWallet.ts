@@ -19,7 +19,9 @@ export class FedimintWallet {
   private _initialized: boolean = false
   private _initPromise?: Promise<void>
 
-  constructor(createTransport: TransportFactory = createWebWorkerTransport) {
+  private constructor(
+    createTransport: TransportFactory = createWebWorkerTransport,
+  ) {
     this._client = new RpcClient(createTransport)
     logger.info('FedimintWallet global instance created')
   }

@@ -34,6 +34,9 @@ const fedimintWallet = FedimintWallet.getInstance()
 // The same instance is returned on subsequent calls
 const sameInstance = FedimintWallet.getInstance()
 console.log(fedimintWallet === sameInstance) // true
+
+// Create and manage wallets
+const wallet = await fedimintWallet.createWallet()
 ```
 
 ## Legacy Constructor (Deprecated)
@@ -44,19 +47,12 @@ console.log(fedimintWallet === sameInstance) // true
 Direct instantiation with `new FedimintWallet()` is deprecated. Use `FedimintWallet.getInstance()` instead.
 :::
 
-#### Parameters
+The constructor is now private. Use the static `getInstance()` method instead.
 
-• **createTransport**: `TransportFactory` = `createWebWorkerTransport`
-
-Transport factory for creating the RPC client transport.
-
-#### Returns
-
-[`FedimintWallet`](index.md)
-
-#### Example
+#### Migration Example
 
 ```ts twoslash
+// @errors: 2673
 import { FedimintWallet } from '@fedimint/core-web'
 
 // ❌ Deprecated - Don't use

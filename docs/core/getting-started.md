@@ -255,14 +255,12 @@ const fedimintWallet = FedimintWallet.getInstance()
 // Create a new wallet
 const wallet = await fedimintWallet.createWallet()
 
+// Join a Federation (if not already part of one)
+const inviteCode = 'fed11qgqpw9thwvaz7t...'
+await wallet.joinFederation(inviteCode)
+
 // Open the wallet
 await wallet.open()
-
-// Join a Federation (if not already part of one)
-if (!wallet.isOpen()) {
-  const inviteCode = 'fed11qgqpw9thwvaz7t...'
-  await wallet.joinFederation(inviteCode)
-}
 
 // Get Wallet Balance
 const balance = await wallet.balance.getBalance()
@@ -270,6 +268,7 @@ const balance = await wallet.balance.getBalance()
 // Subscribe to Balance Updates
 const unsubscribe = wallet.balance.subscribeBalance((balance: number) => {
   console.log('Updated balance:', balance)
+  // balance is in mSats - 1000 mSats = 1 satoshi
 })
 // Remember to call unsubscribe() when done
 
@@ -298,46 +297,46 @@ await businessWallet.joinFederation(
   'fed11qgqrgvnhwden5te0v9k8q6t5d9kxy6t5v4jzumn0wd68y...',
 )
 
-// Get wallets by federation
+// Get wallets by federation  'fed11qgqrgvnhwden5te0v9k8q6t5d9kxy6t5v4jzumn0wd68y...',
 const personalFedWallets =
   fedimintWallet.getWalletsByFederation('federation-id-1')
 const businessFedWallets =
   fedimintWallet.getWalletsByFederation('federation-id-2')
-
-// List all wallet pointers (metadata)
-const walletPointers = fedimintWallet.getAllWalletPointers()
-walletPointers.forEach((pointer) => {
-  console.log(`Wallet ${pointer.id} - Federation: ${pointer.federationId}`)
-  console.log(`Created: ${new Date(pointer.createdAt).toLocaleString()}`)
-  console.log(
-    `Last accessed: ${new Date(pointer.lastAccessedAt).toLocaleString()}`,
-  )
-})
 ```
 
-:::
+:::const personalFedWallets =
+n('federation-id-1')
 
 ## Examples
 
+tion('federation-id-2')
 Check out an example app using [Vite + React](../examples/vite-react.md).
 
 Check out an example app using [VanillaJS + HTML](../examples/bare-js.md).
+lletPointers.forEach((pointer) => {
+Check out an example app using [Next.JS](../examples/next-js.md).onsole.log(`Wallet ${pointer.id} - Federation: ${pointer.federationId}`)
+onsole.log(`Created: ${new Date(pointer.createdAt).toLocaleString()}`)
 
-Check out an example app using [Next.JS](../examples/next-js.md).
+## Resources console.log(
 
-## Resources
+ccessed: ${new Date(pointer.lastAccessedAt).toLocaleString()}`,
+For a list of public federations with invite codes, visit [Bitcoin Mints](https://bitcoinmints.com/?tab=mints&showFedimint=true). )
 
-For a list of public federations with invite codes, visit [Bitcoin Mints](https://bitcoinmints.com/?tab=mints&showFedimint=true).
+## What's Next?```
 
-## What's Next?
+#### Check out the Example Projects:::
 
-#### Check out the Example Projects
-
-- [Vite + React](../examples/vite-react.md)
+- [Vite + React](../examples/vite-react.md)## Examples
 - [VanillaJS + HTML example](../examples/bare-js.md)
-- [Next.JS](../examples/next-js.md)
+- [Next.JS](../examples/next-js.md)Check out an example app using [Vite + React](../examples/vite-react.md).
 
-<br>
+<br>Check out an example app using [VanillaJS + HTML](../examples/bare-js.md).
+
+#### To learn more about Web SDK, explore the docsCheck out an example app using [Next.JS](../examples/next-js.md).
+
+- [SDK Overview](overview)## Resources
+- [Library Architecture](architecture)
+- [API Reference](FedimintWallet/index)visit [Bitcoin Mints](https://bitcoinmints.com/?tab=mints&showFedimint=true).
 
 #### To learn more about Web SDK, explore the docs
 

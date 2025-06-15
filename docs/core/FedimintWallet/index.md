@@ -1,6 +1,10 @@
 # FedimintWallet Overview
 
-The `FedimintWallet` class serves as the main entry point for the library. It orchestrates the various services and the WorkerClient.
+The `FedimintWallet` class serves as the main entry point and wallet manager for the library. It uses a singleton pattern to provide centralized wallet management capabilities.
+
+::: info
+The `FedimintWallet` class now manages multiple wallet instances. Use `FedimintWallet.getInstance()` to get the singleton instance, then create and manage individual wallets through its methods.
+:::
 
 ::: info
 Check out the [Getting Started](../getting-started) guide to get started using the Fedimint Web SDK.
@@ -8,72 +12,165 @@ Check out the [Getting Started](../getting-started) guide to get started using t
 
 <img src="/architecture-diagram.svg" alt="Architecture" />
 
-## Properties
+## Static Methods
 
-### balance
+### getInstance()
 
-> **balance**: `BalanceService`
+> **getInstance**(`createTransport?`): [`FedimintWallet`](index.md)
 
-#### Defined in
+Gets or creates the singleton FedimintWallet instance.
 
-[FedimintWallet.ts:18](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L18)
+#### Parameters
 
----
+• **createTransport**: `TransportFactory` = `createWebWorkerTransport`
 
-### federation
+#### Returns
 
-> **federation**: `FederationService`
-
-#### Defined in
-
-[FedimintWallet.ts:21](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L21)
+[`FedimintWallet`](index.md)
 
 ---
 
-### lightning
+## Instance Methods
 
-> **lightning**: `LightningService`
+### createWallet()
 
-#### Defined in
+> **createWallet**(`walletId?`): `Promise`\<[`Wallet`](../Wallet/index.md)\>
 
-[FedimintWallet.ts:20](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L20)
+Creates a new wallet instance.
+
+#### Parameters
+
+• **walletId**: `string` = `undefined`
+
+Optional ID for the new wallet. If not provided, a new ID will be generated.
+
+#### Returns
+
+`Promise`\<[`Wallet`](../Wallet/index.md)\>
+
+#### Throws
+
+`Error` if a wallet with the specified ID already exists.
 
 ---
 
-### mint
+### openWallet()
 
-> **mint**: `MintService`
+> **openWallet**(`walletId`): `Promise`\<[`Wallet`](../Wallet/index.md)\>
 
-#### Defined in
+Opens an existing wallet by its ID.
 
-[FedimintWallet.ts:19](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L19)
+#### Parameters
+
+• **walletId**: `string`
+
+The ID of the wallet to open.
+
+#### Returns
+
+`Promise`\<[`Wallet`](../Wallet/index.md)\>
+
+#### Throws
+
+`Error` if the wallet with the specified ID does not exist.
 
 ---
 
-### recovery
+### getWallet()
 
-> **recovery**: `RecoveryService`
+> **getWallet**(`walletId`): [`Wallet`](../Wallet/index.md) \| `undefined`
 
-#### Defined in
+Retrieves a wallet by its ID from the WalletRegistry.
 
-[FedimintWallet.ts:22](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L22)
+#### Parameters
 
-## Methods
+• **walletId**: `string`
 
-### cleanup()
+#### Returns
 
-> **cleanup**(): `Promise`\<`void`\>
+[`Wallet`](../Wallet/index.md) \| `undefined`
 
-This should ONLY be called when UNLOADING the wallet client.
-After this call, the FedimintWallet instance should be discarded.
+---
+
+### getAllWallets()
+
+> **getAllWallets**(): [`Wallet`](../Wallet/index.md)[]
+
+Retrieves all active wallet instances.
+
+#### Returns
+
+[`Wallet`](../Wallet/index.md)[]
+
+---
+
+### getAllWalletPointers()
+
+> **getAllWalletPointers**(): `WalletPointer`[]
+
+Retrieves all wallet pointers (metadata) from storage.
+
+#### Returns
+
+`WalletPointer`[]
+
+Array of objects containing wallet metadata including ID, federation info, and timestamps.
+
+---
+
+### getWalletsByFederation()
+
+> **getWalletsByFederation**(`federationId`): [`Wallet`](../Wallet/index.md)[]
+
+Retrieves all wallets associated with a specific federation.
+
+#### Parameters
+
+• **federationId**: `string`
+
+#### Returns
+
+[`Wallet`](../Wallet/index.md)[]
+
+---
+
+### hasWallet()
+
+> **hasWallet**(`walletId`): `boolean`
+
+Checks if a wallet with the given ID exists.
+
+#### Parameters
+
+• **walletId**: `string`
+
+#### Returns
+
+`boolean`
+
+---
+
+### clearAllWallets()
+
+> **clearAllWallets**(): `Promise`\<`void`\>
+
+Clears all wallets from storage and registry.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-#### Defined in
+---
 
-[FedimintWallet.ts:134](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L134)
+### cleanup()
+
+> **cleanup**(): `Promise`\<`void`\>
+
+Cleans up the FedimintWallet instance and all associated resources.
+
+#### Returns
+
+`Promise`\<`void`\>
 
 ---
 
@@ -81,119 +178,23 @@ After this call, the FedimintWallet instance should be discarded.
 
 > **initialize**(): `Promise`\<`void`\>
 
+Initializes the global RpcClient if not already initialized.
+
 #### Returns
 
 `Promise`\<`void`\>
 
-#### Defined in
-
-[FedimintWallet.ts:85](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L85)
-
 ---
 
-### isOpen()
+### isInitialized()
 
-> **isOpen**(): `boolean`
+> **isInitialized**(): `boolean`
+
+Checks if the FedimintWallet instance has been initialized.
 
 #### Returns
 
 `boolean`
-
-#### Defined in
-
-[FedimintWallet.ts:140](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L140)
-
----
-
-### parseInviteCode()
-
-> **parseInviteCode**(`inviteCode`): `Promise`\<`{ url: string; federation_id: string }`\>
-
-#### Parameters
-
-• **inviteCode**: `string`
-
-#### Returns
-
-`Promise`\<`{ url: string; federation_id: string }`\>
-
-#### Defined in
-
-[FedimintWallet.ts:147](https://github.com/fedimint/fedimint-web-sdk/tree/main/packages/core-web/src/FedimintWallet.ts#L147)
-
----
-
-### parseBolt11Invoice()
-
-> **parseBolt11Invoice**(`invoiceStr`): `Promise`\<`{ amount: number; expiry: number; memo: string }`\>
-
-#### Parameters
-
-• **invoiceStr**: `string`
-
-#### Returns
-
-`Promise`\<`{ amount: number; expiry: number; memo: string }`\>
-
-#### Defined in
-
-[FedimintWallet.ts:157](https://github.com/fedimint/fedimint-web-sdk/tree/main/packages/core-web/src/FedimintWallet.ts#157)
-
----
-
-### joinFederation()
-
-> **joinFederation**(`inviteCode`, `clientName`): `Promise`\<`void`\>
-
-#### Parameters
-
-• **inviteCode**: `string`
-
-• **clientName**: `string` = `DEFAULT_CLIENT_NAME`
-
-#### Returns
-
-`Promise`\<`void`\>
-
-#### Defined in
-
-[FedimintWallet.ts:110](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L110)
-
----
-
-### previewFederation(inviteCode)
-
-> **previewFederation**(`inviteCode`): `Promise`\<`{ config: string; federation_id: string }`\>
-
-#### Parameters
-
-• **inviteCode**: `string`
-
-#### Returns
-
-`Promise`\<`{ config: string; federation_id: string }`\>
-
-#### Defined in
-
-[FedimintWallet.ts:141](https://github.com/fedimint/fedimint-web-sdk/tree/main/packages/core-web/src/FedimintWallet.ts#L141)
-
----
-
-### open()
-
-> **open**(`clientName`): `Promise`\<`any`\>
-
-#### Parameters
-
-• **clientName**: `string` = `DEFAULT_CLIENT_NAME`
-
-#### Returns
-
-`Promise`\<`any`\>
-
-#### Defined in
-
-[FedimintWallet.ts:96](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L96)
 
 ---
 
@@ -201,32 +202,60 @@ After this call, the FedimintWallet instance should be discarded.
 
 > **setLogLevel**(`level`): `void`
 
-Sets the log level for the library.
+Sets the global log level for the library.
 
 #### Parameters
 
 • **level**: `"debug"` \| `"info"` \| `"warn"` \| `"error"` \| `"none"`
 
-The desired log level ('DEBUG', 'INFO', 'WARN', 'ERROR', 'NONE').
-
 #### Returns
 
 `void`
 
-#### Defined in
-
-[FedimintWallet.ts:148](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L148)
-
 ---
 
-### waitForOpen()
+### parseInviteCode()
 
-> **waitForOpen**(): `Promise`\<`null` \| `void`\>
+> **parseInviteCode**(`inviteCode`): `Promise`\<`ParsedInviteCode`\>
+
+Parses a federation invite code and retrieves its details.
+
+#### Parameters
+
+• **inviteCode**: `string`
 
 #### Returns
 
-`Promise`\<`null` \| `void`\>
+`Promise`\<`ParsedInviteCode`\>
 
-#### Defined in
+---
 
-[FedimintWallet.ts:91](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L91)
+### previewFederation()
+
+> **previewFederation**(`inviteCode`): `Promise`\<`PreviewFederation`\>
+
+Previews a federation using the provided invite code.
+
+#### Parameters
+
+• **inviteCode**: `string`
+
+#### Returns
+
+`Promise`\<`PreviewFederation`\>
+
+---
+
+### parseBolt11Invoice()
+
+> **parseBolt11Invoice**(`invoice`): `Promise`\<`ParsedBolt11Invoice`\>
+
+Parses a BOLT11 Lightning invoice and retrieves its details.
+
+#### Parameters
+
+• **invoice**: `string`
+
+#### Returns
+
+`Promise`\<`ParsedBolt11Invoice`\>

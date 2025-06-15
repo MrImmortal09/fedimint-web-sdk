@@ -1,53 +1,67 @@
-# new FedimintWallet()
+# FedimintWallet Instance
 
-Creates a new instance of FedimintWallet.
-
-### `new FedimintWallet(lazy?: boolean)`
-
-This constructor initializes a FedimintWallet instance, which manages communication
-with a Web Worker. The Web Worker is responsible for running WebAssembly code that
-handles the core Fedimint Client operations.
-
-- (default) When not in **`lazy` mode**, the constructor immediately initializes the
-  Web Worker and begins loading the WebAssembly module in the background.
-
-- In **`lazy` mode**, the Web Worker and WebAssembly initialization are deferred until
-  the first operation that requires them, reducing initial overhead at the cost
-  of a slight delay on the first operation.
-
-::: tip
-
-`lazy` mode is useful for applications where Fedimint Wallet functionality is not needed immediately. This allows you to create a top-level `FedimintWallet` instance without slowing down your initial page load.
-
-You can later initialize the wallet and open it when needed.
+::: warning Breaking Change
+The `FedimintWallet` class now uses a singleton pattern. Use `FedimintWallet.getInstance()` instead of `new FedimintWallet()`.
 :::
+
+## getInstance()
+
+### `FedimintWallet.getInstance(createTransport?: TransportFactory)`
+
+Gets or creates the singleton FedimintWallet instance.
 
 #### Parameters
 
-• **lazy**: `boolean` = `false`
+• **createTransport**: `TransportFactory` = `createWebWorkerTransport`
 
-If true, delays Web Worker and WebAssembly initialization
-until needed. Default is false.
+Optional transport factory for creating the underlying RPC client transport.
+Default uses Web Worker transport.
 
 #### Returns
 
-[`FedimintWallet`](constructor.md)
+[`FedimintWallet`](index.md)
+
+The singleton FedimintWallet instance.
 
 #### Example
 
 ```ts twoslash
 import { FedimintWallet } from '@fedimint/core-web'
 
-// Create a wallet with immediate initialization // [!code focus]
-const wallet = new FedimintWallet() // wasm gets initialized here // [!code focus]
-wallet.open()
+// Get the singleton instance
+const fedimintWallet = FedimintWallet.getInstance()
 
-// Create a wallet with lazy initialization // [!code focus]
-const lazyWallet = new FedimintWallet(true) // lazy = true // [!code focus]
-// Some time later...
-lazyWallet.open() // wasm gets initialized here
+// The same instance is returned on subsequent calls
+const sameInstance = FedimintWallet.getInstance()
+console.log(fedimintWallet === sameInstance) // true
 ```
 
-#### Defined in
+## Legacy Constructor (Deprecated)
 
-[FedimintWallet.ts:59](https://github.com/fedimint/fedimint-web-sdk/blob/451b02527305a23fec3a269d39bde9a3ec377df2/packages/core-web/src/FedimintWallet.ts#L59)
+### `new FedimintWallet(createTransport?: TransportFactory)`
+
+::: danger Deprecated
+Direct instantiation with `new FedimintWallet()` is deprecated. Use `FedimintWallet.getInstance()` instead.
+:::
+
+#### Parameters
+
+• **createTransport**: `TransportFactory` = `createWebWorkerTransport`
+
+Transport factory for creating the RPC client transport.
+
+#### Returns
+
+[`FedimintWallet`](index.md)
+
+#### Example
+
+```ts twoslash
+import { FedimintWallet } from '@fedimint/core-web'
+
+// ❌ Deprecated - Don't use
+const wallet = new FedimintWallet()
+
+// ✅ Recommended - Use this instead
+const fedimintWallet = FedimintWallet.getInstance()
+```

@@ -1,16 +1,47 @@
 # Architecture
 
-The Fedimint Web SDK **Core Web** library is a modular and extensible JavaScript library designed to interact with the Fedimint client in a web browser. It provides a high-level API for developers to manage federated ecash wallets, perform operations like minting and spending ecash, and interact with the Lightning Network. The library is structured to promote maintainability, scalability, and ease of use, leveraging modern software development practices.
+The Fedimint Web SDK **Core Web** library is a modular and extensible JavaScript library designed to interact with the Fedimint client in a web browser. It provides a high-level API for developers to manage multiple federated ecash wallets, perform operations like minting and spending ecash, and interact with the Lightning Network. The library is structured to promote maintainability, scalability, and ease of use, leveraging modern software development practices.
 
 The **Core Web** library is built around a set of composable services and a communication layer that interacts with a Web Worker running WebAssembly (WASM) code.
 
 <img src="/architecture-diagram.svg" alt="Architecture" />
 
-## [**FedimintWallet**](FedimintWallet/index)
+## [**FedimintWallet**](FedimintWallet/index) - Wallet Manager
 
-The `FedimintWallet` class serves as the main entry point for the library. It orchestrates the various services and the WorkerClient.
+The `FedimintWallet` class serves as the main wallet manager and entry point for the library. It uses a singleton pattern to provide centralized management of multiple wallet instances.
+
+### Multi-Wallet Support:
+
+- Create multiple isolated wallet instances
+- Each wallet can join different federations independently
+- Federation-based wallet discovery and organization
 
 [Code](https://github.com/fedimint/fedimint-web-sdk/blob/main/packages/core-web/src/FedimintWallet.ts)
+
+## **Wallet** - Individual Wallet Instance
+
+Each `Wallet` instance represents a single fedimint client that can join one federation. Wallets are created and managed through the `FedimintWallet` singleton.
+
+### Key Features:
+
+- Independent federation membership
+- Isolated balance and transaction state
+- Service-based API (balance, lightning, mint, etc.)
+
+[Code](https://github.com/fedimint/fedimint-web-sdk/blob/main/packages/core-web/src/Wallet.ts)
+
+## **WalletRegistry** - Storage and Discovery
+
+The `WalletRegistry` manages wallet persistence and discovery across browser sessions.
+
+### Responsibilities:
+
+- Persist wallet metadata to localStorage
+- Enable wallet discovery and reopening
+- Track federation associations
+- Manage wallet lifecycle events
+
+[Code](https://github.com/fedimint/fedimint-web-sdk/blob/main/packages/core-web/src/WalletRegistry.ts)
 
 ## **WorkerClient**
 

@@ -1,9 +1,10 @@
 import { FedimintWallet } from '@fedimint/core-web'
 
-const wallet = new FedimintWallet()
+// Use getInstance instead of new constructor
+const fedimintWallet = FedimintWallet.getInstance()
+fedimintWallet.setLogLevel('debug')
 
-wallet.setLogLevel('debug')
+// Create a default wallet named 'fm-client'
+const wallet = await fedimintWallet.createWallet()
 
-wallet.open()
-
-export { wallet }
+export { wallet, fedimintWallet }

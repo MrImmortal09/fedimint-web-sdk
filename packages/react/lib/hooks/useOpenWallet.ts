@@ -10,29 +10,66 @@ export const useOpenWallet = () => {
     )
   }
 
-  const { wallet, walletStatus, setWalletStatus } = value
+  const {
+    wallet,
+    walletStatus,
+    setWalletStatus,
+    createWallet,
+    openWallet,
+    setActiveWallet,
+  } = value
 
-  const openWallet = useCallback(() => {
-    if (walletStatus === 'open') return
+  const openExistingWallet = useCallback(
+    async (walletId: string) => {
+      if (walletStatus === 'opening') return false
 
-    setWalletStatus('opening')
-    wallet.open().then((res) => {
-      setWalletStatus(res ? 'open' : 'closed')
-    })
-  }, [wallet])
+      setWalletStatus('opening')
+      try {
+        const openedWallet = await openWallet(walletId)
+        setWalletStatus(openedWallet.isOpen() ? 'open' : 'closed')
+        return openedWallet.isOpen()
+      } catch (error) {
+        setWalletStatus('closed')
+        return false
+      }
+    },
+    [openWallet, walletStatus, setWalletStatus],
+  )
 
   const joinFederation = useCallback(
     async (invite: string) => {
-      if (walletStatus === 'open') return
+      if (!wallet) return false
+      if (walletStatus === 'opening') return false
 
       setWalletStatus('opening')
 
-      await wallet.joinFederation(invite).then((res) => {
-        setWalletStatus(res ? 'open' : 'closed')
-      })
+      try {
+        const result = await wallet.joinFederation(invite)
+        setWalletStatus(result ? 'open' : 'closed')
+        return result
+      } catch (error) {
+        setWalletStatus('closed')
+        return false
+      }
     },
-    [wallet],
+    [wallet, walletStatus, setWalletStatus],
   )
 
-  return { walletStatus, openWallet, joinFederation }
+  const createNewWallet = useCallback(async () => {
+    try {
+      await createWallet()
+      return true
+    } catch (error) {
+      return false
+    }
+  }, [createWallet])
+
+  return {
+    wallet,
+    walletStatus,
+    openWallet: openExistingWallet,
+    joinFederation,
+    createWallet: createNewWallet,
+    setActiveWallet,
+  }
 }

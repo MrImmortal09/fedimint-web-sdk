@@ -242,20 +242,23 @@ Check out the [vite-react sample app](../examples/vite-react) for a full working
 
 ## Usage
 
-Here's a basic example of how to use the `@fedimint/core-web` library:
+Here's a basic example of how to use the `@fedimint/core-web` library with the new multi-wallet support:
 
 ::: code-group
 
 ```ts twoslash [example.ts]
 import { FedimintWallet } from '@fedimint/core-web'
 
-// Create the Wallet client
-const wallet = new FedimintWallet()
+// Get the singleton FedimintWallet instance
+const fedimintWallet = FedimintWallet.getInstance()
 
-// Open the wallet (should be called once in the application lifecycle)
+// Create a new wallet
+const wallet = await fedimintWallet.createWallet()
+
+// Open the wallet
 await wallet.open()
 
-// Join a Federation (if not already open)
+// Join a Federation (if not already part of one)
 if (!wallet.isOpen()) {
   const inviteCode = 'fed11qgqpw9thwvaz7t...'
   await wallet.joinFederation(inviteCode)
@@ -266,26 +269,57 @@ const balance = await wallet.balance.getBalance()
 
 // Subscribe to Balance Updates
 const unsubscribe = wallet.balance.subscribeBalance((balance: number) => {
-  // notwoslash
   console.log('Updated balance:', balance)
 })
 // Remember to call unsubscribe() when done
 
-// Receive Ecash Payments
-await wallet.mint.redeemEcash('A11qgqpw9thwvaz7t...')
+// Working with multiple wallets
+const wallet2 = await fedimintWallet.createWallet('my-second-wallet')
+const allWallets = fedimintWallet.getAllWallets()
+const walletPointers = fedimintWallet.getAllWalletPointers()
 
-// Create Lightning Invoice
-await wallet.lightning.createInvoice(10_000, 'description')
+// Open an existing wallet by ID
+const existingWallet = await fedimintWallet.openWallet('wallet-id')
+```
 
-// Pay Lightning Invoice
-await wallet.lightning.payInvoice('lnbc...')
+```ts twoslash [multi-wallet-example.ts]
+import { FedimintWallet } from '@fedimint/core-web'
+
+// Get the singleton instance
+const fedimintWallet = FedimintWallet.getInstance()
+
+// Create multiple wallets for different federations
+const personalWallet = await fedimintWallet.createWallet('personal')
+const businessWallet = await fedimintWallet.createWallet('business')
+
+// Join different federations
+await personalWallet.joinFederation('fed11qgqpw9thwvaz7t...')
+await businessWallet.joinFederation(
+  'fed11qgqrgvnhwden5te0v9k8q6t5d9kxy6t5v4jzumn0wd68y...',
+)
+
+// Get wallets by federation
+const personalFedWallets =
+  fedimintWallet.getWalletsByFederation('federation-id-1')
+const businessFedWallets =
+  fedimintWallet.getWalletsByFederation('federation-id-2')
+
+// List all wallet pointers (metadata)
+const walletPointers = fedimintWallet.getAllWalletPointers()
+walletPointers.forEach((pointer) => {
+  console.log(`Wallet ${pointer.id} - Federation: ${pointer.federationId}`)
+  console.log(`Created: ${new Date(pointer.createdAt).toLocaleString()}`)
+  console.log(
+    `Last accessed: ${new Date(pointer.lastAccessedAt).toLocaleString()}`,
+  )
+})
 ```
 
 :::
 
 ## Examples
 
-Check out an example app using [Vite + React example](../examples/vite-react.md).
+Check out an example app using [Vite + React](../examples/vite-react.md).
 
 Check out an example app using [VanillaJS + HTML](../examples/bare-js.md).
 

@@ -1,6 +1,6 @@
 export { useBalance } from './useBalance'
 export { useOpenWallet } from './useOpenWallet'
-export { useFedimintWallet } from './useFedimintWallet'
+export { useFedimintWallet, useWallet } from './useFedimintWallet'
 export { useReceiveLightning } from './useReceiveLightning'
 export { useSendLightning } from './useSendLightning'
 export { useSpendEcash } from './useSpendEcash'

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useFedimintWallet, useOpenWallet } from '.'
+import { useWallet } from './useFedimintWallet'
 import { type SpendNotesState } from '@fedimint/core-web'
 
 export const useSpendEcash = () => {
-  const wallet = useFedimintWallet()
-  const { walletStatus } = useOpenWallet()
+  const wallet = useWallet()
 
   const [operationId, setOperationId] = useState<string>()
   const [notes, setNotes] = useState<string>()
@@ -13,14 +12,14 @@ export const useSpendEcash = () => {
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    if (!operationId) return
+    if (!operationId || !wallet?.isOpen()) return
 
     const unsubscribe = wallet.mint.subscribeSpendNotes(
       operationId,
-      (_state) => {
+      (_state: SpendNotesState) => {
         setState(_state)
       },
-      (error) => {
+      (error: string) => {
         setState('Error')
         setError(error)
       },
@@ -29,24 +28,22 @@ export const useSpendEcash = () => {
     return () => {
       unsubscribe()
     }
-  }, [operationId])
+  }, [operationId, wallet])
 
   const spendEcash = useCallback(
     async (amountSats: number, reclaimAfter?: number) => {
-      if (walletStatus !== 'open') throw new Error('Wallet is not open')
-      const response = await wallet.mint.spendNotes(
-        amountSats * 1000,
-        reclaimAfter,
-      )
+      if (!wallet?.isOpen()) throw new Error('Wallet is not open')
+      const response = await wallet.mint.spendNotes(amountSats, reclaimAfter)
       setOperationId(response.operation_id)
       setNotes(response.notes)
-      return response.notes
+      return response
     },
-    [wallet, walletStatus],
+    [wallet],
   )
 
   return {
     spendEcash,
+    operationId,
     notes,
     state,
     error,

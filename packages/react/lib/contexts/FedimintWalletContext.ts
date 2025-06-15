@@ -1,13 +1,14 @@
-import { FedimintWallet } from '@fedimint/core-web'
+import { FedimintWallet, Wallet } from '@fedimint/core-web'
 import {
   createContext,
   createElement,
+  useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react'
 
-let wallet: FedimintWallet
+let fedimintWallet: FedimintWallet
 
 type FedimintWalletConfig = {
   lazy?: boolean
@@ -17,17 +18,22 @@ type FedimintWalletConfig = {
 export type WalletStatus = 'open' | 'closed' | 'opening'
 
 export const setupFedimintWallet = (config: FedimintWalletConfig) => {
-  wallet = new FedimintWallet(!!config.lazy)
+  // Use getInstance instead of new
+  fedimintWallet = FedimintWallet.getInstance()
   if (config.debug) {
-    wallet.setLogLevel('debug')
+    fedimintWallet.setLogLevel('debug')
   }
 }
 
 export const FedimintWalletContext = createContext<
   | {
-      wallet: FedimintWallet
+      fedimintWallet: FedimintWallet
+      wallet: Wallet | undefined
       walletStatus: WalletStatus
       setWalletStatus: (status: WalletStatus) => void
+      createWallet: () => Promise<Wallet>
+      openWallet: (walletId: string) => Promise<Wallet>
+      setActiveWallet: (wallet: Wallet | undefined) => void
     }
   | undefined
 >(undefined)
@@ -38,27 +44,57 @@ export const FedimintWalletProvider = (
   parameters: React.PropsWithChildren<FedimintWalletProviderProps>,
 ) => {
   const [walletStatus, setWalletStatus] = useState<WalletStatus>('closed')
+  const [activeWallet, setActiveWallet] = useState<Wallet | undefined>()
   const { children } = parameters
 
-  if (!wallet)
+  if (!fedimintWallet)
     throw new Error(
       'You must call setupFedimintWallet() first. See the getting started guide.',
     )
 
-  const contextValue = useMemo(
-    () => ({
-      wallet,
-      walletStatus,
-      setWalletStatus,
-    }),
-    [walletStatus],
-  )
+  const createWallet = useCallback(async () => {
+    const wallet = await fedimintWallet.createWallet()
+    setActiveWallet(wallet)
+    return wallet
+  }, [])
+
+  const openWallet = useCallback(async (walletId: string) => {
+    const wallet = await fedimintWallet.openWallet(walletId)
+    setActiveWallet(wallet)
+    return wallet
+  }, [])
+
+  const setActiveWalletWrapper = useCallback((wallet: Wallet | undefined) => {
+    setActiveWallet(wallet)
+    setWalletStatus(wallet?.isOpen() ? 'open' : 'closed')
+  }, [])
 
   useEffect(() => {
-    wallet.waitForOpen().then(() => {
-      setWalletStatus('open')
-    })
-  }, [wallet])
+    if (activeWallet) {
+      setWalletStatus(activeWallet.isOpen() ? 'open' : 'closed')
+    } else {
+      setWalletStatus('closed')
+    }
+  }, [activeWallet])
+
+  const contextValue = useMemo(
+    () => ({
+      fedimintWallet,
+      wallet: activeWallet,
+      walletStatus,
+      setWalletStatus,
+      createWallet,
+      openWallet,
+      setActiveWallet: setActiveWalletWrapper,
+    }),
+    [
+      walletStatus,
+      activeWallet,
+      createWallet,
+      openWallet,
+      setActiveWalletWrapper,
+    ],
+  )
 
   return createElement(
     FedimintWalletContext.Provider,

@@ -53,19 +53,52 @@ export class Wallet {
     )
   }
 
+  /**
+   * Gets the federation ID associated with this wallet.
+   *
+   * @returns {string | undefined} The federation ID if the wallet is part of a federation, otherwise undefined.
+   */
   get federationId(): string | undefined {
     return this._federationId
   }
 
+  /**
+   * Gets the client name used for RPC communication.
+   *
+   * @returns {string} The client name in the format 'wallet-{walletId}'.
+   */
   get clientName(): string {
     return this._clientName
   }
 
+  /**
+   * Waits for the wallet to be opened.
+   *
+   * This method returns a promise that resolves when the wallet is successfully opened.
+   * If the wallet is already open, it resolves immediately.
+   *
+   * @returns {Promise<void>} A promise that resolves when the wallet is open.
+   */
   async waitForOpen(): Promise<void> {
     if (this._isOpen) return Promise.resolve()
     return this._openPromise
   }
 
+  /**
+   * Opens the wallet for use.
+   *
+   * This method initializes the RPC client connection and opens the wallet client.
+   * If the wallet is already open, it returns true without performing any operations.
+   *
+   * @returns {Promise<boolean>} A promise that resolves to true if the wallet was opened successfully, false otherwise.
+   *
+   * @example
+   * const wallet = await fedimintWallet.createWallet();
+   * const success = await wallet.open();
+   * if (success) {
+   *   console.log("Wallet opened successfully");
+   * }
+   */
   async open(): Promise<boolean> {
     if (this._isOpen) {
       logger.warn(`Wallet ${this.id} is already open`)
@@ -88,6 +121,24 @@ export class Wallet {
     }
   }
 
+  /**
+   * Joins a federation using the provided invite code.
+   *
+   * This method allows the wallet to join a federation by processing the invite code.
+   * The wallet must not be already open or part of another federation.
+   *
+   * @param {string} inviteCode - The federation invite code to join with.
+   * @returns {Promise<boolean>} A promise that resolves to true if the federation was joined successfully, false otherwise.
+   * @throws {Error} If the wallet is already open or already part of a federation.
+   *
+   * @example
+   * const wallet = await fedimintWallet.createWallet();
+   * const inviteCode = "fed11qgqrgvnhwden5te0v9k8q6t5d9kxy6t5v4jzumn0wd68yvfwvdhk6tcqqysptkuvknca";
+   * const success = await wallet.joinFederation(inviteCode);
+   * if (success) {
+   *   console.log("Successfully joined federation");
+   * }
+   */
   async joinFederation(inviteCode: string) {
     if (this._isOpen) {
       throw new Error(
@@ -136,6 +187,18 @@ export class Wallet {
     }
   }
 
+  /**
+   * Cleans up the wallet resources.
+   *
+   * This method closes the wallet client connection, removes the wallet from the registry,
+   * and resets the wallet state. It should be called when the wallet is no longer needed.
+   *
+   * @returns {Promise<void>} A promise that resolves when cleanup is complete.
+   *
+   * @example
+   * await wallet.cleanup();
+   * console.log("Wallet cleaned up");
+   */
   async cleanup(): Promise<void> {
     try {
       if (this._isOpen) {
@@ -150,6 +213,18 @@ export class Wallet {
     }
   }
 
+  /**
+   * Checks if the wallet is currently open.
+   *
+   * @returns {boolean} True if the wallet is open and ready for operations, false otherwise.
+   *
+   * @example
+   * if (wallet.isOpen()) {
+   *   console.log("Wallet is ready for operations");
+   * } else {
+   *   await wallet.open();
+   * }
+   */
   isOpen(): boolean {
     return this._isOpen
   }
